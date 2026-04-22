@@ -69,18 +69,22 @@ This enables frontend to track multi-step analyses that can pause/resume.
 
 ### Backend
 - **main.py** — FastAPI app, lifespan (symbol cache), endpoints, error handling
-- **models.py** — Pydantic types (AnalysisRequest, AnalysisResponse, MarketData, etc.)
+- **models.py** — Pydantic types (AnalysisRequest, AnalysisResponse, OHLCVBar, SignalBadge, EntryExitLevels, SignalsResponse, etc.)
 - **ai_engine.py** — Claude API calls, prompt builder, JSON extraction, validation rules
 - **scraper/price.py** — PSX price data, symbol caching, trend/52-week derivation
 - **scraper/news.py** — Google News RSS, sentiment classification, concurrent fetching
 - **scraper/financials.py** — HTML scraping, P/E/dividend/market cap extraction
-- **.env** — API keys and configuration
+- **scraper/signals.py** — Moving averages (SMA20/60/120), support/resistance clustering, volatility/volume analysis
+- **.env** — API keys and configuration (ANTHROPIC_API_KEY, CLAUDE_MODEL, CORS_ORIGINS)
 
 ### Frontend
-- **App.jsx** — Main component, state management, checklist persistence
+- **App.jsx** — Main component, state management, checklist persistence, concurrent API calls
 - **components/SearchBar.jsx** — Ticker input with auto-uppercase
 - **components/AnalysisCard.jsx** — Verdict badge, confidence gauge, bull/bear cases, key drivers
-- **components/PriceChart.jsx** — Recharts AreaChart, 30-day history, tooltip
+- **components/CandlestickChart.jsx** — Interactive OHLC visualization with timeframe tabs (lightweight-charts v4.2)
+- **components/TechnicalSignals.jsx** — Signal badges with color-coded sentiment (bullish/bearish/neutral)
+- **components/EntryExitLevels.jsx** — 6-tile grid (current price, entry zone, stop loss, targets, risk/reward)
+- **components/Tooltip.jsx** — Smart tooltip positioning (above/below, prevents overflow)
 - **components/ChecklistPanel.jsx** — Task status display (DONE/FAILED/PENDING)
 - **components/LoadingState.jsx** — Animated progress with cycling messages
 - **components/ErrorBanner.jsx** — Error display with dismissible banner
@@ -107,23 +111,45 @@ This enables frontend to track multi-step analyses that can pause/resume.
 - Financial data (fundamentals: growth, debt, dividends)
 - Checklist state (to resume from checkpoint)
 
-## Implementation Status: ✅ COMPLETE
+## Implementation Status: ✅ PHASE 2 COMPLETE
 
-The full MVP is implemented and tested. Both backend and frontend are functional.
+### Phase 1 (MVP) – COMPLETED ✅
+- Backend FastAPI with PSX data fetching
+- Frontend React with Vite + Tailwind
+- AI Engine Claude integration with validation
+- 30-day area chart with Recharts
+- Verdict badge + Confidence gauge
+- Bull/bear cases + Checklist system
+- Error handling + Git repository
+
+### Phase 2 (Signals & Charts) – COMPLETED ✅
+- **Candlestick charts** – Interactive OHLC visualization with timeframe tabs (30/60/90/252 days)
+- **Technical signals** – 16+ plain-English signal badges (no jargon: "buying momentum" not "RSI")
+- **Entry/Exit levels** – Buy zones, stop loss, profit targets with risk/reward ratios
+- **Support/Resistance** – Clustering method (3+ touches within 5%)
+- **Moving averages** – SMA20, SMA60, SMA120 calculations
+- **Volatility & volume signals** – Risk assessment with plain English labels
+- **Current price display** – Exact PKR value in Entry & Exit Levels tiles
+- **Smart tooltips** – Hover explanations on all tiles with intelligent positioning
+- **Grid alignment** – Perfect 2x3 tile layout with consistent spacing
 
 ### Backend Architecture
 - **Data models** – Pydantic types for requests, responses, market/news/financials data
 - **Price scraper** – Fetches PSX EOD data from dps.psx.com.pk, computes trend/52-week stats
 - **News scraper** – Concurrent Google News RSS fetching with keyword-based sentiment
 - **Financials scraper** – BeautifulSoup HTML scraping with graceful fallback
+- **Signals calculator** – Moving averages, volatility, support/resistance, momentum analysis
 - **AI engine** – Claude Haiku integration with prompt builder + validation layer
-- **FastAPI app** – Lifespan management for symbol cache, `/health` + `POST /analyze` endpoints
+- **FastAPI app** – Lifespan management for symbol cache
+  - `/health` – Service health check
+  - `POST /analyze` – Full AI verdict with checklist resumption
+  - `GET /signals/{ticker}?timeframe={30,60,90,252}` – Technical signals with 1-hour cache
 
 ### Frontend Architecture
 - **React + Vite** – Fast dev server, Tailwind CSS for styling
-- **Components** – SearchBar, AnalysisCard (verdict/confidence), PriceChart (Recharts), ChecklistPanel, LoadingState, ErrorBanner
+- **Components** – SearchBar, AnalysisCard (verdict/confidence), CandlestickChart (OHLC), TechnicalSignals (badges), EntryExitLevels (tiles), ChecklistPanel, LoadingState, ErrorBanner, Tooltip
 - **State management** – Checklist persistence for analysis resumption
-- **Chart rendering** – 30-day price history with area chart (green=uptrend, red=downtrend)
+- **Chart rendering** – Interactive candlestick charts with SMA overlays, volume histogram, and responsive timeframe tabs
 
 ## How to Run
 
@@ -229,6 +255,27 @@ curl -X POST http://localhost:8000/analyze \
 - **Case test**: Send "hbl" (lowercase) → should auto-uppercase to HBL
 - **Checklist test**: Send back checklist with FAILED/PENDING tasks → should resume
 - **Frontend test**: Search for tickers in browser → verify chart displays 30 points
+
+## Phase 3 Roadmap (Upcoming)
+
+### Planned Features
+- **Advanced chart indicators** – Keep plain-English descriptions (moving average crossovers as "momentum points")
+- **Historical analysis tracking** – Store past verdicts and compare accuracy over time
+- **Comparative analysis** – Side-by-side comparison of multiple tickers
+- **Backtesting engine** – Test verdict accuracy against historical price movements
+- **Watchlist management** – Save favorite tickers and track changes
+- **Alert system** – Notify when stock hits target price or crosses key levels
+- **Real-time data** – Replace EOD with intraday updates from PSX DPS API
+- **Database persistence** – Store analysis history and user preferences
+- **Mobile app** – React Native version for iOS/Android
+- **PDF export** – Generate analysis reports
+
+### Architecture Improvements
+- Implement Redis caching for signals (beyond 1-hour TTL)
+- Add WebSocket support for real-time price updates
+- Refactor AI engine for streaming responses (faster UX feedback)
+- Add authentication layer for user-specific data
+- Implement rate limiting and abuse prevention
 
 ## Known Limitations & Future Improvements
 

@@ -8,14 +8,16 @@ An intelligent financial decision engine for the Pakistan Stock Exchange (PSX) t
 
 ## 🚀 Features
 
-### Phase 1: Core MVP ✅
+### Stock Analysis (PSX Tickers) – Phase 1 & 2 ✅ COMPLETE
+
+#### Phase 1: Core MVP ✅
 - **AI Verdict Engine** – Synthesizes market data, news sentiment, and fundamentals into actionable verdicts
 - **Confidence & Risk Assessment** – Data-driven confidence scores (0–100%) with risk levels (LOW/MEDIUM/HIGH)
 - **Bull & Bear Cases** – Dual-perspective analysis showing positive and negative factors
 - **Price Charts** – 30-day interactive area chart with trend visualization
 - **Analysis Checklist** – Resumable multi-step analysis with task tracking
 
-### Phase 2: Signals & Charts ✅
+#### Phase 2: Signals & Charts ✅
 - **Candlestick Charts** – Interactive OHLC visualization with:
   - Color-coded candles (green=up, red=down)
   - Volume histogram overlay
@@ -320,16 +322,64 @@ VITE_API_BASE=http://localhost:8000    # Backend URL
 
 ---
 
-## 🚀 Phase 3 Roadmap
+## 🚀 Phase 3: Mutual Fund Analysis (In Development)
 
-- 📊 Advanced chart indicators (plain English descriptions)
-- 📈 Historical verdict tracking & accuracy backtesting
-- 🔔 Real-time alerts (price targets, key levels)
-- 👥 Comparative ticker analysis
-- 💾 Database persistence (watchlists, analysis history)
+Extends Intelli-Trade to analyze Pakistan mutual funds listed on MUFAP alongside PSX stocks.
+
+### Phase 3 Features ⏳
+- **Separate Mutual Fund Tab** – Independent UI section for fund analysis
+- **Fund Search & Filtering** – Search by name/code, filter by type (equity/fixed income/balanced/index/VPS)
+- **AI-Powered Fund Verdict** – Same verdict system (BUY NOW/SLOWLY/HOLD/STAY AWAY/SELL) adapted for funds
+- **Fund Performance Analysis** – Historical returns (1Y/3Y/5Y), NAV trends, benchmark comparison
+- **Risk Assessment** – Sharpe ratio, volatility, beta (plain English labels)
+- **Cost-Benefit Analysis** – Expense ratio, front-end load, fee vs return comparison
+- **Fund Composition Display** – Top holdings, sector allocation, asset mix breakdown
+- **Fund Manager Assessment** – Track record, tenure, AUM management, performance consistency
+- **Candlestick Charts** – Interactive NAV trends with timeframe tabs (reusing Phase 2 components)
+- **Technical Signals** – Performance signals adapted for mutual funds
+- **Side-by-Side Comparison** – Compare 2-3 mutual funds with verdict comparison
+
+### Data Sources
+- **MUFAP** – Pakistan Mutual Funds Association data (fund list, NAV, performance)
+- **Fund Details** – Scrape from mufap.com.pk (composition, manager info, fees)
+- **Caching Strategy** – 1-day TTL for NAV/performance, 1-week for holdings/list
+
+### Backend Enhancements
+- `GET /funds` – List all available MUFAP funds with filtering
+- `POST /analyze/fund` – Full AI verdict for a single fund (~12-18s)
+- `GET /signals/fund/{code}?timeframe=...` – Fund performance signals (~3-5s)
+- `GET /compare/funds?codes=...` – Side-by-side comparison of 2-3 funds
+- `scraper/mutual_funds.py` – MUFAP data extraction and caching
+
+### Frontend Components
+- **MutualFundSearchBar** – Fund search with type filtering
+- **FundAnalysisCard** – Verdict badge, confidence, risk, investment horizon
+- **FundPerformanceChart** – Interactive NAV chart with timeframe tabs
+- **FundCompositionDisplay** – Holdings grid, sector pie chart, asset allocation
+- **FundMetricsPanel** – 6-tile grid (expense ratio, Sharpe, volatility, beta, etc.)
+- **FundComparisonView** – Side-by-side analysis for 2-3 funds
+- **ManagerAssessment** – Fund manager profile and track record
+
+### Implementation Timeline
+**6-7 weeks, high priority** (Start immediately after Phase 2 merge)
+1. Data layer & MUFAP scraping (Week 1-2)
+2. AI engine with fund-specific logic (Week 2-3)
+3. Backend endpoints & caching (Week 3-4)
+4. Frontend components & search (Week 4-5)
+5. Comparison view & integration (Week 5-6)
+6. Testing & optimization (Week 6-7)
+
+---
+
+## 🎯 Future Roadmap (Phase 4+)
+
+- 📊 Historical verdict tracking & accuracy backtesting
+- 📈 Portfolio construction recommendations (stocks + funds)
+- 🔔 Real-time alerts (price targets, key levels, fund rebalancing)
+- 💾 Database persistence (watchlists, analysis history, user preferences)
 - 📱 Mobile app (React Native)
 - ⚡ Real-time intraday data (replace EOD)
-- 🔐 User authentication & preferences
+- 🔐 User authentication & multi-device sync
 
 ---
 

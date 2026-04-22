@@ -83,7 +83,7 @@ export default function TechnicalSignals({ badges, loading }) {
         {sortedBadges.map((badge, idx) => (
           <Tooltip key={idx} text={signalTooltips[badge.text] || "This signal indicates market conditions."}>
             <div
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition whitespace-nowrap cursor-help ${getBadgeStyles(badge.sentiment)}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-help inline-block ${getBadgeStyles(badge.sentiment)}`}
             >
               <span className="mr-1">{getArrowIcon(badge.sentiment)}</span>
               {badge.text}

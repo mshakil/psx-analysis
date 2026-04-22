@@ -82,3 +82,47 @@ class AnalysisResponse(BaseModel):
     data_quality: DataQuality
     checklist: dict
     recent_prices: list[dict]
+    current_price: float
+
+
+class OHLCVBar(BaseModel):
+    date: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+
+
+class SignalBadge(BaseModel):
+    text: str
+    sentiment: Literal["BULLISH", "BEARISH", "NEUTRAL"]
+    category: Literal["momentum", "volatility", "volume", "trend", "support_resistance"]
+
+
+class EntryExitLevels(BaseModel):
+    entry_low: float
+    entry_high: float
+    stop_loss: float
+    target1: float
+    target2: float
+    risk_reward_ratio: float
+    entry_label: str
+    stop_label: str
+    target1_label: str
+    target2_label: str
+
+
+class SignalsResponse(BaseModel):
+    ticker: str
+    timeframe_days: int
+    ohlcv: list[OHLCVBar]
+    badges: list[SignalBadge]
+    entry_exit: EntryExitLevels
+    support_level: Optional[float]
+    resistance_level: Optional[float]
+    sma20: Optional[float]
+    sma60: Optional[float]
+    sma120: Optional[float]
+    disclaimer: str
+    cached_at: str

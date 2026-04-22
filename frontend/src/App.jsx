@@ -1,7 +1,9 @@
 import { useState } from "react";
 import SearchBar from "./components/SearchBar";
 import AnalysisCard from "./components/AnalysisCard";
-import PriceChart from "./components/PriceChart";
+import CandlestickChart from "./components/CandlestickChart";
+import TechnicalSignals from "./components/TechnicalSignals";
+import EntryExitLabels from "./components/EntryExitLabels";
 import LoadingState from "./components/LoadingState";
 import ErrorBanner from "./components/ErrorBanner";
 
@@ -13,12 +15,42 @@ export default function App() {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [checklist, setChecklist] = useState(null);
+  const [signals, setSignals] = useState(null);
+  const [signalsLoading, setSignalsLoading] = useState(false);
+  const [signalsError, setSignalsError] = useState(null);
+
+  const fetchSignals = async (inputTicker) => {
+    setSignalsLoading(true);
+    setSignalsError(null);
+    try {
+      const resp = await fetch(`${API_BASE}/signals/${inputTicker}?timeframe=30`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.detail || "Signals fetch failed");
+      }
+
+      const data = await resp.json();
+      setSignals(data);
+    } catch (err) {
+      setSignalsError(err.message);
+    } finally {
+      setSignalsLoading(false);
+    }
+  };
 
   const handleAnalyze = async (inputTicker) => {
     setLoading(true);
     setError(null);
     setResult(null);
+    setSignals(null);
     setTicker(inputTicker);
+
+    // Fire signals fetch immediately (don't await)
+    fetchSignals(inputTicker);
 
     try {
       const resp = await fetch(`${API_BASE}/analyze`, {
@@ -61,9 +93,15 @@ export default function App() {
         {result && (
           <>
             <AnalysisCard result={result} />
-            {result.recent_prices && (
-              <PriceChart data={result.recent_prices} ticker={result.ticker} />
-            )}
+            <TechnicalSignals badges={signals?.badges} loading={signalsLoading} />
+            <CandlestickChart
+              ohlcv={signals?.ohlcv}
+              sma20={signals?.sma20}
+              sma60={signals?.sma60}
+              ticker={result.ticker}
+              signalsLoading={signalsLoading}
+            />
+            <EntryExitLabels entryExit={signals?.entry_exit} currentPrice={result.current_price} />
           </>
         )}
       </main>

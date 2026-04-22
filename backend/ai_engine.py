@@ -281,5 +281,6 @@ async def run_analysis(
     data = json.loads(json_match.group())
     data = _validate_response(data)
     data["recent_prices"] = market.recent_prices
+    data["current_price"] = market.current_price
 
     return AnalysisResponse(**data)

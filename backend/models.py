@@ -82,6 +82,7 @@ class AnalysisResponse(BaseModel):
     data_quality: DataQuality
     checklist: dict
     recent_prices: list[dict]
+    current_price: float
 
 
 class OHLCVBar(BaseModel):

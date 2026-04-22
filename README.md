@@ -397,12 +397,6 @@ This project is under active development. For bug reports or feature requests, p
 
 ---
 
-## ⚖️ License
-
-MIT License – See LICENSE file for details
-
----
-
 ## 🙋 Support
 
 **Getting Started?** Follow the "Getting Started" section above.

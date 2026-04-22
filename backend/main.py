@@ -13,7 +13,7 @@ from models import AnalysisRequest, AnalysisResponse, SignalsResponse, NewsData,
 from scraper.price import load_symbol_cache, fetch_price_data, validate_ticker
 from scraper.news import fetch_news
 from scraper.financials import fetch_financials
-from scraper.signals import fetch_ohlcv_yfinance, build_signals, translate_signals_to_plain_english
+from scraper.signals import fetch_ohlcv_psx, build_signals, translate_signals_to_plain_english
 from ai_engine import run_analysis
 
 load_dotenv()
@@ -127,9 +127,9 @@ async def get_signals(ticker: str, timeframe: int = 30):
         if time.time() - cached_time < 3600:
             return cached_response
 
-    # Fetch OHLCV data from yfinance
+    # Fetch OHLCV data from PSX EOD API
     try:
-        ohlcv = await fetch_ohlcv_yfinance(ticker)
+        ohlcv = await fetch_ohlcv_psx(ticker, http_client)
         if not ohlcv:
             raise HTTPException(status_code=404, detail=f"No OHLCV data found for {ticker}")
 

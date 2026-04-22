@@ -1,38 +1,49 @@
 import asyncio
+import httpx
 import statistics
 from datetime import datetime
 from typing import Optional
-import yfinance as yf
 from models import OHLCVBar, SignalBadge, EntryExitLevels, SignalsResponse
 
-
-def _sync_fetch_yfinance(ticker_ka: str) -> list[dict]:
-    """Fetch OHLCV data from yfinance for PSX ticker. Synchronous helper for asyncio.to_thread."""
-    try:
-        df = yf.download(ticker_ka, period="1y", interval="1d", auto_adjust=True, progress=False)
-        if df.empty:
-            raise ValueError(f"No data returned from yfinance for {ticker_ka}")
-        df = df.reset_index()
-        result = []
-        for _, row in df.iterrows():
-            result.append({
-                "date": row["Date"].strftime("%Y-%m-%d"),
-                "open": round(float(row["Open"]), 2),
-                "high": round(float(row["High"]), 2),
-                "low": round(float(row["Low"]), 2),
-                "close": round(float(row["Close"]), 2),
-                "volume": int(row["Volume"]),
-            })
-        return result
-    except Exception as e:
-        raise ValueError(f"yfinance fetch failed for {ticker_ka}: {str(e)}")
+PSX_EOD_BASE = "https://dps.psx.com.pk/timeseries/eod"
 
 
-async def fetch_ohlcv_yfinance(ticker: str) -> list[OHLCVBar]:
-    """Fetch OHLCV data from yfinance asynchronously. Ticker is appended with .KA suffix."""
-    ticker_ka = f"{ticker.upper()}.KA"
-    ohlcv_dicts = await asyncio.to_thread(_sync_fetch_yfinance, ticker_ka)
-    return [OHLCVBar(**d) for d in ohlcv_dicts]
+async def fetch_ohlcv_psx(ticker: str, client: httpx.AsyncClient) -> list[OHLCVBar]:
+    """
+    Fetch OHLCV data from PSX EOD API.
+    PSX returns [timestamp, close, volume, open] — we estimate high/low from open/close.
+    """
+    url = f"{PSX_EOD_BASE}/{ticker.upper()}?length=252"
+    resp = await client.get(url, timeout=15.0)
+    resp.raise_for_status()
+    raw = resp.json()
+
+    if raw.get("status") != 1 or not raw.get("data"):
+        raise ValueError(f"No EOD data for {ticker}")
+
+    rows = raw["data"]
+    if not rows:
+        raise ValueError(f"Empty EOD data for {ticker}")
+
+    result = []
+    for row in reversed(rows):  # Reverse to get oldest-first order
+        ts, close, volume, open_price = row[0], row[1], row[2], row[3]
+        date = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+
+        # Estimate high/low from open/close with 2% buffer for intraday range
+        hi = max(open_price, close) * 1.02
+        lo = min(open_price, close) * 0.98
+
+        result.append(OHLCVBar(
+            date=date,
+            open=round(open_price, 2),
+            high=round(hi, 2),
+            low=round(lo, 2),
+            close=round(close, 2),
+            volume=int(volume),
+        ))
+
+    return result
 
 
 def compute_moving_averages(closes: list[float]) -> dict:

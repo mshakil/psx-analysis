@@ -120,8 +120,8 @@ class SignalsResponse(BaseModel):
     entry_exit: EntryExitLevels
     support_level: Optional[float]
     resistance_level: Optional[float]
-    sma20: float
-    sma60: float
+    sma20: Optional[float]
+    sma60: Optional[float]
     sma120: Optional[float]
     disclaimer: str
     cached_at: str

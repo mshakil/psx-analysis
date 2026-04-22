@@ -126,3 +126,171 @@ class SignalsResponse(BaseModel):
     sma120: Optional[float]
     disclaimer: str
     cached_at: str
+
+
+# ============================================
+# PHASE 3: MUTUAL FUND ANALYSIS MODELS
+# ============================================
+
+class FundType(str, Enum):
+    EQUITY = "EQUITY"
+    FIXED_INCOME = "FIXED_INCOME"
+    BALANCED = "BALANCED"
+    INDEX = "INDEX"
+    VPS = "VPS"
+    OTHER = "OTHER"
+
+
+class InvestmentHorizon(str, Enum):
+    SHORT_TERM = "SHORT_TERM"
+    MEDIUM_TERM = "MEDIUM_TERM"
+    LONG_TERM = "LONG_TERM"
+
+
+class BenchmarkComparison(str, Enum):
+    OUTPERFORMING = "outperforming"
+    IN_LINE = "in_line"
+    UNDERPERFORMING = "underperforming"
+
+
+class FeeAssessment(str, Enum):
+    EXPENSIVE = "expensive"
+    FAIR = "fair"
+    CHEAP = "cheap"
+
+
+# --- Scraper data models (soft-fail with data_available flag) ---
+
+
+class NAVBar(BaseModel):
+    date: str
+    nav: float
+
+
+class FundNavHistory(BaseModel):
+    fund_code: str
+    nav_bars: list[NAVBar]
+    current_nav: Optional[float] = None
+    nav_1w_change_pct: Optional[float] = None
+    nav_1m_change_pct: Optional[float] = None
+    data_available: bool
+
+
+class FundPerformanceData(BaseModel):
+    returns_1y: Optional[float] = None
+    returns_3y: Optional[float] = None
+    returns_5y: Optional[float] = None
+    benchmark_returns_1y: Optional[float] = None
+    sharpe_ratio: Optional[float] = None
+    std_deviation: Optional[float] = None
+    beta: Optional[float] = None
+    data_available: bool
+
+
+class FundCompositionData(BaseModel):
+    top_holdings: list[str] = []
+    sector_allocation: dict[str, float] = {}
+    asset_mix: dict[str, float] = {}
+    data_available: bool
+
+
+class FundInfoData(BaseModel):
+    fund_code: str
+    fund_name: str
+    fund_type: str
+    amc_name: str
+    current_nav: Optional[float] = None
+    aum_bn_pkr: Optional[float] = None
+    expense_ratio: Optional[float] = None
+    front_end_load: Optional[float] = None
+    manager_name: Optional[str] = None
+    manager_tenure_years: Optional[float] = None
+    inception_date: Optional[str] = None
+    data_available: bool
+
+
+# --- Request/Response models ---
+
+
+class FundAnalysisRequest(BaseModel):
+    fund_code: str = Field(..., min_length=2, max_length=30)
+    checklist: Optional[dict] = None
+
+
+class FundListItem(BaseModel):
+    fund_code: str
+    fund_name: str
+    fund_type: str
+    amc_name: str
+    current_nav: Optional[float] = None
+    ytd_return: Optional[float] = None
+
+
+class PerformanceMetrics(BaseModel):
+    returns_1y: Optional[float] = None
+    returns_3y: Optional[float] = None
+    returns_5y: Optional[float] = None
+    benchmark_comparison: Optional[BenchmarkComparison] = None
+    sharpe_ratio: Optional[float] = None
+    volatility: Optional[str] = None
+    beta: Optional[float] = None
+
+
+class FeeStructure(BaseModel):
+    expense_ratio: Optional[float] = None
+    front_end_load: Optional[float] = None
+    total_cost: Optional[float] = None
+    fee_assessment: Optional[FeeAssessment] = None
+
+
+class CompositionBreakdown(BaseModel):
+    top_holdings: list[str] = []
+    sector_allocation: dict[str, float] = {}
+    asset_mix: dict[str, float] = {}
+
+
+class FundAnalysisResponse(BaseModel):
+    fund_code: str
+    fund_name: str
+    fund_type: FundType
+    verdict: Verdict
+    confidence_score: int = Field(..., ge=0, le=100)
+    risk_level: RiskLevel
+    investment_horizon: InvestmentHorizon
+    summary_plain_english: str = Field(..., max_length=800)
+    manager_assessment: str
+    cost_benefit_analysis: str
+    composition_breakdown: CompositionBreakdown
+    performance_metrics: PerformanceMetrics
+    fee_structure: FeeStructure
+    bull_case: list[str]
+    bear_case: list[str]
+    key_drivers: list[str]
+    data_quality: DataQuality
+    checklist: dict
+    current_nav: Optional[float] = None
+
+
+class FundComparisonSummary(BaseModel):
+    better_returns: Optional[str] = None
+    lower_fees: Optional[str] = None
+    best_risk_adjusted: Optional[str] = None
+    overall_winner: Optional[str] = None
+
+
+class FundComparisonResponse(BaseModel):
+    funds: list[FundAnalysisResponse]
+    comparison: FundComparisonSummary
+
+
+class FundSignalsResponse(BaseModel):
+    fund_code: str
+    timeframe_days: int
+    nav_history: list[NAVBar]
+    badges: list[SignalBadge]
+    trend_direction: str
+    sma20: Optional[float] = None
+    sma60: Optional[float] = None
+    sma120: Optional[float] = None
+    disclaimer: str
+    cached_at: str

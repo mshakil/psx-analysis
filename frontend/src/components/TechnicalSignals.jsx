@@ -1,5 +1,3 @@
-import Tooltip from "./Tooltip";
-
 const signalTooltips = {
   "Clear upward trend": "The stock price is consistently going up. This is a positive sign.",
   "Downward pressure on price": "The stock price is consistently going down. Be cautious.",
@@ -81,14 +79,21 @@ export default function TechnicalSignals({ badges, loading }) {
       <h3 className="text-sm font-semibold text-gray-300 mb-3">Technical Signals</h3>
       <div className="flex gap-2 flex-wrap">
         {sortedBadges.map((badge, idx) => (
-          <Tooltip key={idx} text={signalTooltips[badge.text] || "This signal indicates market conditions."}>
+          <div key={idx} className="group relative inline-block">
             <div
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-help inline-block ${getBadgeStyles(badge.sentiment)}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-help ${getBadgeStyles(badge.sentiment)}`}
             >
               <span className="mr-1">{getArrowIcon(badge.sentiment)}</span>
               {badge.text}
             </div>
-          </Tooltip>
+
+            {/* Tooltip */}
+            <div className="absolute left-1/2 bottom-full transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-gray-100 text-xs rounded-md border border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 pointer-events-auto whitespace-normal w-max max-w-xs shadow-xl">
+              {signalTooltips[badge.text] || "This signal indicates market conditions."}
+              {/* Arrow */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+            </div>
+          </div>
         ))}
       </div>
     </div>

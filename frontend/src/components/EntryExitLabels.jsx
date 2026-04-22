@@ -1,14 +1,19 @@
-import Tooltip from "./Tooltip";
-
 const TileCard = ({ label, value, tooltip, subtext, borderColor = "border-gray-700", textColor = "text-white" }) => {
   return (
-    <Tooltip text={tooltip}>
-      <div className={`relative group bg-gray-800/50 rounded-lg p-4 border ${borderColor} cursor-help h-full transition-all hover:bg-gray-800`}>
-        <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{label}</p>
-        <p className={`text-lg font-bold ${textColor}`}>{value}</p>
-        {subtext && <p className="text-xs text-gray-400 mt-2">{subtext}</p>}
-      </div>
-    </Tooltip>
+    <div className={`group relative bg-gray-800/50 rounded-lg p-4 border ${borderColor} cursor-help h-full transition-all hover:bg-gray-800`}>
+      <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">{label}</p>
+      <p className={`text-lg font-bold ${textColor}`}>{value}</p>
+      {subtext && <p className="text-xs text-gray-400 mt-2">{subtext}</p>}
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div className="absolute left-1/2 bottom-full transform -translate-x-1/2 mb-3 px-3 py-2 bg-gray-800 text-gray-100 text-xs rounded-md border border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 pointer-events-auto whitespace-normal w-max max-w-xs shadow-xl">
+          {tooltip}
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+        </div>
+      )}
+    </div>
   );
 };
 
